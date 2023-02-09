@@ -9,8 +9,18 @@ sns.set()
 import os
 import requests
 import datetime
+from env import username, host, password
 
-################################## Planet Acquire and CSV Function ############################
+
+######################## Get SQL Connection Function #########################
+
+
+def get_connection(db, user=username, host=host, password=password):
+    
+    return f'mysql+pymysql://{user}:{password}@{host}/{db}'
+
+    
+########################## Planet Acquire and CSV Function ####################
 
 def get_planet_data():
     '''
@@ -35,7 +45,7 @@ def get_planet_data():
     return df
 
 
-################################## Starships Acquire and CSV Function ############################
+###################### Starships Acquire and CSV Function ####################
 
 def get_starships_data():
     '''
@@ -61,7 +71,7 @@ def get_starships_data():
 
 
 
-################################## People Acquire and CSV Function ############################
+####################### People Acquire and CSV Function #######################
 
 def get_people_data():
     '''
@@ -86,7 +96,7 @@ def get_people_data():
     return df
 
 
-################################## Germany Acquire and CSV Function ############################
+######################## Germany Acquire and CSV Function ####################
 
 def get_germany_data():
     '''
@@ -103,3 +113,32 @@ def get_germany_data():
         df.to_csv('opsd_germany_daily.csv')
 
     return df
+
+###################### Store Acquire and CSV Function ####################
+
+def get_store_data():
+    '''
+    This function looks for a csv file,
+    if the file has not already been create, 
+    it pulls the query from sql, saves it to a csv for future use
+    and returns a pandas dataframe using that query.
+    ''' 
+    filename = 'store.csv'  
+    if os.path.exists(filename):    
+        return pd.read_csv(filename)
+    
+    else: 
+        query = '''
+                SELECT sale_date, sale_amount,
+                item_brand, item_name, item_price,
+                store_address, store_zipcode
+                FROM sales
+                LEFT JOIN items USING(item_id)
+                LEFT JOIN stores USING(store_id)
+                '''
+        url = get_connection(db='tsa_item_demand')
+        
+        df = pd.read_sql(query, url)
+        df.to_csv(filename, index=False)
+        
+        return df
