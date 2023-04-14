@@ -66,6 +66,40 @@ def prep_germany_data():
     
     return df
 
+########################## Prep Saas Data Function ##########################
+
+def prep_saas_data():
+    '''
+    This function takes in a df and changes date dtypes, resets date as index,
+    creates new columns for month, weekday, and total sales
+    and returns that as a new pandas dataframe
+    '''
+    
+    #assign variable df from the acquire function
+    df= pd.read_csv('saas.csv')
+    
+    #rename columns by lowercasing them all
+    df.columns = [col.lower() for col in df]
+               
+    #change data type on Date
+    df.month_invoiced = df.month_invoiced.astype('datetime64[ns]')
+    #set the index to Date
+    df = df.set_index('month_invoiced').sort_index()
+    #change amount from float to int
+    df.amount = df.amount.astype(int)
+    #change sub type from float to int
+    df.subscription_type = df.subscription_type.astype(int)
+    
+    #create new colum for month
+    df['month'] = df.index.month_name()
+    #create new colum for weekday
+    df['day_of_week'] = df.index.day_name()
+    #create new column for year
+    df['year'] = df.index.year
+    
+    return df
+
+  
 ########################### Convert to Datetime Function #######################
 
 def convert_to_datetime(df):
